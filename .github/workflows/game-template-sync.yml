@@ -1,0 +1,33 @@
+name: Game template sync
+
+on:
+  workflow_call:
+    secrets:
+      TEMPLATE_SYNC_TOKEN:
+        description: >-
+          PAT or GitHub App token with `workflow` scope. Required as soon as the sync
+          touches .github/workflows/ (github.token may not push workflow changes).
+        required: false
+
+permissions: {}
+
+jobs:
+  sync:
+    if: github.repository != 'Gaming-Configs-Overdrive/game-config-skeleton'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # PAT/App token with workflow scope needed once workflows are synchronised
+          token: ${{ secrets.TEMPLATE_SYNC_TOKEN || github.token }}
+      - uses: AndreasAugustin/actions-template-sync@6e1d0089686f8940604fc15baae62367bf6ee860 # v2.6.0
+        with:
+          source_gh_token: ${{ github.token }}
+          target_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN || github.token }}
+          source_repo_path: Gaming-Configs-Overdrive/game-config-skeleton
+          upstream_branch: main
+          pr_title: "🔧 chore(template): sync skeleton"
+          pr_commit_msg: "🔧 chore(template): sync skeleton"
